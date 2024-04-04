@@ -1,7 +1,14 @@
-import "./App.css";
+import { Container } from "react-bootstrap";
+import Login from "./login/Login";
 
 function App() {
-  return <></>;
+  return (
+    <>
+      <Container>
+        <Login />
+      </Container>
+    </>
+  );
 }
 
 export default App;
