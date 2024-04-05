@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { Button, Col, Container, Row, Form } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
@@ -12,6 +12,40 @@ const Profile = () => {
 
   const url =
     "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyBhWgo-onnehVfjggey6b2N9Rel6F0txZc";
+
+  const fetchData = useCallback(async () => {
+    const url =
+      "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyBhWgo-onnehVfjggey6b2N9Rel6F0txZc";
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+          idToken: token,
+          returnSecureToken: true,
+        }),
+        header: {
+          "Content-type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data.users[0]);
+        fullNameInputRef.current.value = data.users[0].displayName;
+        profilePhotoUrlRef.current.value = data.users[0].photoUrl;
+      } else {
+        let errorMsg = "Fail!!";
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      alert(error);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -33,7 +67,7 @@ const Profile = () => {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        // const data = await response.json();
         alert("Successfully Updated!!!");
       } else {
         let errorMsg = "Data Updation Fail!!";
