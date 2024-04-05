@@ -34,13 +34,17 @@ const Welcome = () => {
       alert(error);
     }
   };
+
+  const onLogoutHandler = () => {
+    authCtx.logOut();
+  };
   return (
     <Container className="my-5">
       <Row>
-        <Col>
+        <Col xs={6}>
           <h2>Welcome To Expense-Tracker!!</h2>
         </Col>
-        <Col>
+        <Col xs={5}>
           <div className="d-grid gap-2">
             <Button variant="secondary">
               <span> Your Profile is Incomplete.</span>
@@ -51,6 +55,11 @@ const Welcome = () => {
               </span>
             </Button>
           </div>
+        </Col>
+        <Col>
+          <Button variant="success" onClick={onLogoutHandler}>
+            Logout
+          </Button>
         </Col>
       </Row>
       <hr />
