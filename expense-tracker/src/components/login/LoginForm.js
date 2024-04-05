@@ -1,9 +1,11 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useRef, useState } from "react";
 import { Form, Col, Row, Container, Button } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 
 const LoginForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const emailInputRef = useRef();
   const pwdInputRef = useRef();
 
@@ -44,6 +46,37 @@ const LoginForm = () => {
     pwdInputRef.current.value = "";
   };
 
+  const onForgetPwdHandler = async () => {
+    setIsLoading(true);
+    const url =
+      "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyBhWgo-onnehVfjggey6b2N9Rel6F0txZc";
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+          requestType: "PASSWORD_RESET",
+          email: emailInputRef.current.value,
+          returnSecureToken: true,
+        }),
+        header: {
+          "Content-type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        authCtx.login(data.idToken);
+      } else {
+        let errorMsg = "Authentication Fail!!";
+        throw new Error(errorMsg);
+      }
+    } catch (error) {
+      alert(error);
+    }
+    setIsLoading(false);
+  };
+
   return (
     <Container className="mt-5">
       <Row className="justify-content-center">
@@ -71,6 +104,17 @@ const LoginForm = () => {
                       ref={pwdInputRef}
                     />
                   </Form.Group>
+
+                  <div className="d-grid gap-2 my-2">
+                    {isLoading && (
+                      <p style={{ textAlign: "center" }}>Loading....</p>
+                    )}
+                    {!isLoading && (
+                      <Button variant="link" onClick={onForgetPwdHandler}>
+                        Forget Password?
+                      </Button>
+                    )}
+                  </div>
 
                   <div className="d-grid gap-2">
                     <Button variant="primary" type="submit">
