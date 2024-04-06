@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
+import ExpenseForm from "../expenses/ExpenseForm";
 
 const Welcome = () => {
   const authCtx = useContext(AuthContext);
@@ -72,6 +73,8 @@ const Welcome = () => {
           </div>
         </Col>
       </Row>
+
+      <ExpenseForm />
     </Container>
   );
 };
