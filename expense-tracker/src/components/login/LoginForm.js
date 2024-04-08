@@ -34,7 +34,7 @@ const LoginForm = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        authCtx.login(data.idToken);
+        authCtx.login(data.idToken, data.email);
       } else {
         let errorMsg = "Authentication Fail!!";
         throw new Error(errorMsg);
@@ -66,7 +66,7 @@ const LoginForm = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        authCtx.login(data.idToken);
+        authCtx.login(data.idToken, data.email);
       } else {
         let errorMsg = "Authentication Fail!!";
         throw new Error(errorMsg);

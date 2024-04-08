@@ -12,7 +12,12 @@ const ExpenseList = (props) => {
               <Col>{item.description}</Col>
               <Col>{item.money}</Col>
               <Col>
-                <Button variant="danger">Remove</Button>
+                <Button variant="success" onClick={() => props.onEdit(item)}>
+                  Edit
+                </Button>
+              </Col>
+              <Col>
+                <Button variant="danger" onClick={()=>props.onDelete(item.id)}>Remove</Button>
               </Col>
             </Row>
             <hr />

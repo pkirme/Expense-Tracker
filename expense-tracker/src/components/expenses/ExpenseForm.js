@@ -1,39 +1,22 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Form, Col, Row, Container, Button } from "react-bootstrap";
 import ExpenseList from "./ExpenseList";
-import axios from "axios";
+
+import ExpenseDatabaseContext from "../../context/ExpenseDatabaseContext";
 
 const ExpenseForm = () => {
-  const [expenses, setExpenses] = useState([]);
-
   const spentMoneyInputRef = useRef();
   const descriptionInputRef = useRef();
   const selectInputRef = useRef("select");
+  const [id, setId] = useState(null);
 
-  const url =
-    "https://expensetracker-8fe52-default-rtdb.firebaseio.com/Expenses.json";
-
-  const fetchDataFromDatabase = useCallback(async () => {
-    const getData = await axios.get(url);
-    const dataList = [];
-    for (const key in getData.data) {
-      const data = {
-        id: key,
-        money: getData.data[key].money,
-        description: getData.data[key].description,
-        category: getData.data[key].category,
-      };
-      dataList.push(data);
-    }
-    setExpenses(dataList);
-    console.log(expenses);
-  }, []);
+  const expenseCtx = useContext(ExpenseDatabaseContext);
 
   useEffect(() => {
-    fetchDataFromDatabase();
-  }, [fetchDataFromDatabase]);
+    expenseCtx.fetchDataFromDatabase();
+  }, []);
 
-  const onFormSubmit = async (e) => {
+  const onFormSubmitHandler = async (e) => {
     e.preventDefault();
     const money = spentMoneyInputRef.current.value;
     const description = descriptionInputRef.current.value;
@@ -42,17 +25,39 @@ const ExpenseForm = () => {
       alert("One of field is empty!");
       return;
     }
-    const expense = {
-      money,
-      description,
-      category,
-    };
-    await axios.post(url, expense);
-    fetchDataFromDatabase();
+    if (id !== null) {
+      console.log(id);
+      const expense = {
+        id,
+        money,
+        description,
+        category,
+      };
+      expenseCtx.addExpense(expense, "update");
+    } else {
+      const expense = {
+        money,
+        description,
+        category,
+      };
+      expenseCtx.addExpense(expense, "add");
+    }
 
     spentMoneyInputRef.current.value = "";
     descriptionInputRef.current.value = "";
     selectInputRef.current.value = "Select";
+  };
+
+  const onEditHandler = (expense) => {
+    spentMoneyInputRef.current.value = expense.money;
+    descriptionInputRef.current.value = expense.description;
+    selectInputRef.current.value = expense.category;
+
+    setId(expense.id);
+  };
+
+  const onDeleteHandler = async (id) => {
+    expenseCtx.deleteExpense(id);
   };
 
   return (
@@ -64,7 +69,7 @@ const ExpenseForm = () => {
               <div className="card-body">
                 <h4 className="card-title text-center">Expense</h4>
                 <hr />
-                <Form onSubmit={onFormSubmit}>
+                <Form onSubmit={onFormSubmitHandler}>
                   <Form.Group className="mb-3" controlId="spentMoney">
                     <Form.Label>Money</Form.Label>
                     <Form.Control
@@ -114,7 +119,11 @@ const ExpenseForm = () => {
           <div style={{ background: "white" }}>
             <div className="card border-primary">
               <div className="card-body">
-                <ExpenseList data={expenses} />
+                <ExpenseList
+                  data={expenseCtx.data}
+                  onEdit={onEditHandler}
+                  onDelete={onDeleteHandler}
+                />
               </div>
             </div>
           </div>
