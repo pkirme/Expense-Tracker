@@ -1,6 +1,7 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Form, Col, Row, Container, Button } from "react-bootstrap";
 import ExpenseList from "./ExpenseList";
+import axios from "axios";
 
 const ExpenseForm = () => {
   const [expenses, setExpenses] = useState([]);
@@ -9,7 +10,30 @@ const ExpenseForm = () => {
   const descriptionInputRef = useRef();
   const selectInputRef = useRef("select");
 
-  const onFormSubmit = (e) => {
+  const url =
+    "https://expensetracker-8fe52-default-rtdb.firebaseio.com/Expenses.json";
+
+  const fetchDataFromDatabase = useCallback(async () => {
+    const getData = await axios.get(url);
+    const dataList = [];
+    for (const key in getData.data) {
+      const data = {
+        id: key,
+        money: getData.data[key].money,
+        description: getData.data[key].description,
+        category: getData.data[key].category,
+      };
+      dataList.push(data);
+    }
+    setExpenses(dataList);
+    console.log(expenses);
+  }, []);
+
+  useEffect(() => {
+    fetchDataFromDatabase();
+  }, [fetchDataFromDatabase]);
+
+  const onFormSubmit = async (e) => {
     e.preventDefault();
     const money = spentMoneyInputRef.current.value;
     const description = descriptionInputRef.current.value;
@@ -23,8 +47,9 @@ const ExpenseForm = () => {
       description,
       category,
     };
-    setExpenses((prevData) => [...prevData, expense]);
-    alert("Expense added successfully!!");
+    await axios.post(url, expense);
+    fetchDataFromDatabase();
+
     spentMoneyInputRef.current.value = "";
     descriptionInputRef.current.value = "";
     selectInputRef.current.value = "Select";
