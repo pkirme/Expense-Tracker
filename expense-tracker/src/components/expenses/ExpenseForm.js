@@ -1,47 +1,64 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+
 import { Form, Col, Row, Container, Button } from "react-bootstrap";
+
 import ExpenseList from "./ExpenseList";
 
-import ExpenseDatabaseContext from "../../context/ExpenseDatabaseContext";
+import { useDispatch, useSelector } from "react-redux";
+import { expenseActions } from "../../store/expense";
+
+import axios from "axios";
 
 const ExpenseForm = () => {
+  const url = `https://expensetracker-8fe52-default-rtdb.firebaseio.com`;
+
   const spentMoneyInputRef = useRef();
   const descriptionInputRef = useRef();
   const selectInputRef = useRef("select");
   const [id, setId] = useState(null);
 
-  const expenseCtx = useContext(ExpenseDatabaseContext);
-
-  useEffect(() => {
-    expenseCtx.fetchDataFromDatabase();
-  }, []);
+  const dispatch = useDispatch();
+  const isAuth = useSelector((state) => state.auth.isLoggedIn);
 
   const onFormSubmitHandler = async (e) => {
     e.preventDefault();
     const money = spentMoneyInputRef.current.value;
     const description = descriptionInputRef.current.value;
     const category = selectInputRef.current.value;
-    if (!money || !description) {
-      alert("One of field is empty!");
-      return;
-    }
-    if (id !== null) {
-      console.log(id);
-      const expense = {
-        id,
-        money,
-        description,
-        category,
-      };
-      expenseCtx.addExpense(expense, "update");
-    } else {
-      const expense = {
-        money,
-        description,
-        category,
-      };
-      expenseCtx.addExpense(expense, "add");
-    }
+
+    try {
+      if (isAuth) {
+        const email = localStorage.getItem("email").replace(/[.@]/g, "");
+        if (!money || !description) {
+          alert("One of field is empty!");
+          return;
+        }
+        if (id !== null) {
+          console.log(id);
+          const expense = {
+            id,
+            money,
+            description,
+            category,
+          };
+          await axios.put(`${url}/${email}/${expense.id}/.json`, expense);
+          dispatch(
+            expenseActions.updateExpense({ id, money, description, category })
+          );
+        } else {
+          const expense = {
+            money,
+            description,
+            category,
+          };
+          const response = await axios.post(`${url}/${email}.json`, expense);
+          const id = response.data.name;
+          dispatch(
+            expenseActions.addExpense({ id, money, description, category })
+          );
+        }
+      }
+    } catch (error) {}
 
     spentMoneyInputRef.current.value = "";
     descriptionInputRef.current.value = "";
@@ -57,7 +74,15 @@ const ExpenseForm = () => {
   };
 
   const onDeleteHandler = async (id) => {
-    expenseCtx.deleteExpense(id);
+    try {
+      if (isAuth) {
+        const email = localStorage.getItem("email").replace(/[.@]/g, "");
+        await axios.delete(`${url}/${email}/${id}/.json`);
+        await dispatch(expenseActions.removeExpense(id));
+      } else {
+        return;
+      }
+    } catch (error) {}
   };
 
   return (
@@ -120,7 +145,6 @@ const ExpenseForm = () => {
             <div className="card border-primary">
               <div className="card-body">
                 <ExpenseList
-                  data={expenseCtx.data}
                   onEdit={onEditHandler}
                   onDelete={onDeleteHandler}
                 />

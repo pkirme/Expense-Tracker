@@ -1,10 +1,15 @@
 import React, { Fragment } from "react";
+
 import { Container, Row, Col, Button } from "react-bootstrap";
 
+import { useSelector } from "react-redux";
+
 const ExpenseList = (props) => {
+  const expenses = useSelector((state) => state.expense.expenses);
+  // console.log(expenses);
   return (
     <Container>
-      {props.data.map((item) => {
+      {expenses.map((item) => {
         return (
           <Fragment key={item.id}>
             <Row className="my-4">
@@ -17,7 +22,12 @@ const ExpenseList = (props) => {
                 </Button>
               </Col>
               <Col>
-                <Button variant="danger" onClick={()=>props.onDelete(item.id)}>Remove</Button>
+                <Button
+                  variant="danger"
+                  onClick={() => props.onDelete(item.id)}
+                >
+                  Remove
+                </Button>
               </Col>
             </Row>
             <hr />

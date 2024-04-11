@@ -1,14 +1,14 @@
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Button, Col, Container, Row, Form } from "react-bootstrap";
+import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
-import AuthContext from "../../context/AuthContext";
+// import AuthContext from "../../context/AuthContext";
 
 const Profile = () => {
   const fullNameInputRef = useRef();
   const profilePhotoUrlRef = useRef();
 
-  const authCtx = useContext(AuthContext);
-  const token = authCtx.token;
+  const token = useSelector((state) => state.auth.token);
 
   const url =
     "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyBhWgo-onnehVfjggey6b2N9Rel6F0txZc";
@@ -67,7 +67,6 @@ const Profile = () => {
       });
 
       if (response.ok) {
-        // const data = await response.json();
         alert("Successfully Updated!!!");
       } else {
         let errorMsg = "Data Updation Fail!!";

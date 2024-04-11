@@ -1,12 +1,14 @@
-import React, { useContext } from "react";
+// import React, { useContext } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import AuthContext from "../../context/AuthContext";
+// import AuthContext from "../../context/AuthContext";
 import ExpenseForm from "../expenses/ExpenseForm";
+import { useDispatch, useSelector } from "react-redux";
+import { authActions } from "../../store/auth";
 
 const Welcome = () => {
-  const authCtx = useContext(AuthContext);
-  const token = authCtx.token;
+  const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.token);
 
   const onClickHandler = async () => {
     const url =
@@ -37,7 +39,7 @@ const Welcome = () => {
   };
 
   const onLogoutHandler = () => {
-    authCtx.logOut();
+    dispatch(authActions.logout());
   };
   return (
     <Container className="my-5">

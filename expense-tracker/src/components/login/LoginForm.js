@@ -1,15 +1,17 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
+
 import { Form, Col, Row, Container, Button } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-import AuthContext from "../../context/AuthContext";
+
+import { useDispatch } from "react-redux";
+import { authActions } from "../../store/auth";
 
 const LoginForm = () => {
-  const [isLoading, setIsLoading] = useState(false);
-
   const emailInputRef = useRef();
   const pwdInputRef = useRef();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const authCtx = useContext(AuthContext);
+  const dispatch = useDispatch();
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
@@ -18,6 +20,7 @@ const LoginForm = () => {
 
     const url =
       "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyBhWgo-onnehVfjggey6b2N9Rel6F0txZc";
+
     try {
       const response = await fetch(url, {
         method: "POST",
@@ -27,14 +30,14 @@ const LoginForm = () => {
           returnSecureToken: true,
         }),
         header: {
-          "Content-type": "application/json",
+          "Content-Type": "application/json",
         },
       });
 
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        authCtx.login(data.idToken, data.email);
+        dispatch(authActions.login({ token: data.idToken, email: data.email }));
       } else {
         let errorMsg = "Authentication Fail!!";
         throw new Error(errorMsg);
@@ -66,7 +69,7 @@ const LoginForm = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(data);
-        authCtx.login(data.idToken, data.email);
+        dispatch(authActions.login({ token: data.idToken, email: data.email }));
       } else {
         let errorMsg = "Authentication Fail!!";
         throw new Error(errorMsg);

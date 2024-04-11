@@ -1,41 +1,74 @@
 import { Switch, Route, Redirect } from "react-router-dom";
 
-import { useContext } from "react";
-import AuthContext from "./context/AuthContext";
+import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useEffect } from "react";
+import { expenseActions } from "./store/expense";
+
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import WelcomePage from "./pages/WelcomePage";
 import ProfilePage from "./pages/ProfilePage";
 
+import axios from "axios";
+
 function App() {
-  const authCtx = useContext(AuthContext);
-  const isUserLoggedIn = authCtx.isLoggedIn;
+  const url = `https://expensetracker-8fe52-default-rtdb.firebaseio.com`;
+
+  const dispatch = useDispatch();
+  const isAuth = useSelector((state) => state.auth.isLoggedIn);
+  const userEmail = useSelector((state) => state.auth.email);
+
+  const fetchDataFromDatabaseHandler = useCallback(async () => {
+    if (isAuth) {
+      const email = userEmail.replace(/[.@]/g, "");
+      const getData = await axios.get(`${url}/${email}.json`);
+      console.log(getData);
+      const dataList = [];
+      for (const key in getData.data) {
+        const data = {
+          id: key,
+          money: getData.data[key].money,
+          description: getData.data[key].description,
+          category: getData.data[key].category,
+        };
+        dataList.push(data);
+      }
+      dispatch(expenseActions.setInitialData(dataList));
+    } else {
+      return;
+    }
+  }, [isAuth]);
+
+  useEffect(() => {
+    fetchDataFromDatabaseHandler();
+  }, [fetchDataFromDatabaseHandler]);
+
   return (
     <Switch>
-      {isUserLoggedIn && (
+      {isAuth && (
         <Route path="/" exact>
           <WelcomePage />
         </Route>
       )}
-      {isUserLoggedIn && (
+      {isAuth && (
         <Route path="/profile">
           <ProfilePage />
         </Route>
       )}
 
-      {!isUserLoggedIn && (
+      {!isAuth && (
         <Route path="/" exact>
           <Login />
         </Route>
       )}
 
-      {!isUserLoggedIn && (
+      {!isAuth && (
         <Route path="/signup">
           <SignUp />
         </Route>
       )}
 
-      {!isUserLoggedIn && (
+      {!isAuth && (
         <Route>
           <Redirect to="/" />
         </Route>
