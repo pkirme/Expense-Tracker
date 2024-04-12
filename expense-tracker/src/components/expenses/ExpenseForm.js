@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { NavLink } from "react-router-dom";
 
 import { Form, Col, Row, Container, Button } from "react-bootstrap";
 
@@ -85,6 +86,28 @@ const ExpenseForm = () => {
     } catch (error) {}
   };
 
+  const expensesList = useSelector((state) => state.expense.expenses);
+  const onDownloadHandler = () => {
+    let csvContent = "Category,Description,Amount\n"; // CSV header
+    expensesList.forEach((expense) => {
+      csvContent += `${expense.category},${expense.description},${expense.money}\n`;
+    });
+
+    // Create a Blob with the CSV data
+    const blob = new Blob([csvContent]);
+
+    // Create a URL for the Blob
+    const url = window.URL.createObjectURL(blob);
+
+    // Create an anchor element to trigger the download
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "expenses.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Container className="mt-5">
       <Row className="justify-content-center">
@@ -133,6 +156,15 @@ const ExpenseForm = () => {
                     </Button>
                   </div>
                 </Form>
+                <div className="d-grid gap-2 my-2">
+                  <Button
+                    variant="success"
+                    type="link"
+                    onClick={onDownloadHandler}
+                  >
+                    Download Expenses
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
