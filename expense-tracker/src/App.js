@@ -11,6 +11,8 @@ import ProfilePage from "./pages/ProfilePage";
 
 import axios from "axios";
 
+import "./App.css";
+
 function App() {
   const url = `https://expensetracker-8fe52-default-rtdb.firebaseio.com`;
 

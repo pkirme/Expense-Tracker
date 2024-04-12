@@ -1,8 +1,10 @@
-import { Button, Col, Container, Row } from "react-bootstrap";
+import { Button, Col, Container, Row, Form, Navbar } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
 import ExpenseForm from "../expenses/ExpenseForm";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store/auth";
+import { useState } from "react";
+import { themeActions } from "../../store/theme";
 
 const Welcome = () => {
   const dispatch = useDispatch();
@@ -41,17 +43,28 @@ const Welcome = () => {
     dispatch(authActions.logout());
   };
 
-  const activateMembershipHandler=()=>{
-    
-  }
+  const activateMembershipHandler = () => {};
+
+  const mode = useSelector((state) => state.theme.mode);
+  const onToggleMode = () => {
+    if (mode === "light") {
+      dispatch(themeActions.setTheme("dark"));
+      document.body.style.backgroundColor = "black";
+      document.body.style.color = "white";
+    } else {
+      dispatch(themeActions.setTheme("light"));
+      document.body.style.backgroundColor = "white";
+      document.body.style.color = "black";
+    }
+  };
 
   return (
-    <Container className="my-5">
-      <Row>
-        <Col xs={6}>
+    <>
+      <Navbar className={`expand-lg bg-${mode} `}>
+        <Col xs={4}>
           <h2>Welcome To Expense-Tracker!!</h2>
         </Col>
-        <Col xs={5}>
+        <Col xs={5} className="mx-1">
           <div className="d-grid gap-2">
             <Button variant="secondary">
               <span> Your Profile is Incomplete.</span>
@@ -63,36 +76,46 @@ const Welcome = () => {
             </Button>
           </div>
         </Col>
-        <Col>
+        <Col xs={1}>
           <Button variant="success" onClick={onLogoutHandler}>
             Logout
           </Button>
         </Col>
-      </Row>
-      <hr />
-      <Row>
-        <Col>
-          <div className="d-grid gap-2">
-            <Button variant="secondary" onClick={onClickHandler}>
-              Verify Email Id.
-            </Button>
-          </div>
-        </Col>
-      </Row>
-      {expenseTotal > 10000 && (
-        <Row className="my-2">
+        <Form>
+          <Form.Check // prettier-ignore
+            type="switch"
+            id="themeSelector"
+            label="Change Theme"
+            onChange={onToggleMode}
+          />
+        </Form>
+      </Navbar>
+
+      <Container className={`my-3 bg-${mode}`}>
+        <Row>
           <Col>
             <div className="d-grid gap-2">
-              <Button variant="secondary" onClick={activateMembershipHandler}>
-                Activate Prime Membership.
+              <Button variant="secondary" onClick={onClickHandler}>
+                Verify Email Id.
               </Button>
             </div>
           </Col>
         </Row>
-      )}
+        {expenseTotal > 10000 && (
+          <Row className="my-2">
+            <Col>
+              <div className="d-grid gap-2">
+                <Button variant="secondary" onClick={activateMembershipHandler}>
+                  Activate Premium.
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        )}
 
-      <ExpenseForm />
-    </Container>
+        <ExpenseForm />
+      </Container>
+    </>
   );
 };
 
