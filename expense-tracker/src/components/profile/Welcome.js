@@ -1,13 +1,12 @@
-// import React, { useContext } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { NavLink } from "react-router-dom";
-// import AuthContext from "../../context/AuthContext";
 import ExpenseForm from "../expenses/ExpenseForm";
 import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../../store/auth";
 
 const Welcome = () => {
   const dispatch = useDispatch();
+  const expenseTotal = useSelector((state) => state.expense.totalAmount);
   const token = useSelector((state) => state.auth.token);
 
   const onClickHandler = async () => {
@@ -41,6 +40,11 @@ const Welcome = () => {
   const onLogoutHandler = () => {
     dispatch(authActions.logout());
   };
+
+  const activateMembershipHandler=()=>{
+    
+  }
+
   return (
     <Container className="my-5">
       <Row>
@@ -75,6 +79,17 @@ const Welcome = () => {
           </div>
         </Col>
       </Row>
+      {expenseTotal > 10000 && (
+        <Row className="my-2">
+          <Col>
+            <div className="d-grid gap-2">
+              <Button variant="secondary" onClick={activateMembershipHandler}>
+                Activate Prime Membership.
+              </Button>
+            </div>
+          </Col>
+        </Row>
+      )}
 
       <ExpenseForm />
     </Container>

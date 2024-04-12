@@ -24,6 +24,7 @@ function App() {
       const getData = await axios.get(`${url}/${email}.json`);
       console.log(getData);
       const dataList = [];
+      let totalAmount = 0;
       for (const key in getData.data) {
         const data = {
           id: key,
@@ -32,8 +33,9 @@ function App() {
           category: getData.data[key].category,
         };
         dataList.push(data);
+        totalAmount += parseInt(data.money);
       }
-      dispatch(expenseActions.setInitialData(dataList));
+      dispatch(expenseActions.setInitialData({ dataList, totalAmount }));
     } else {
       return;
     }
